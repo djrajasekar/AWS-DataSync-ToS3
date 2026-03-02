@@ -339,3 +339,50 @@ Source (WAS Logs)
 → S3 (SSE-KMS)
 → Lifecycle to Glacier
 → Monitoring via CloudWatch
+
+****************************************************************
+Response
+**************************
+Optimizing tool selection...
+
+I’m going to scaffold a production-ready Terraform solution in this repo with secure DataSync-to-S3 architecture, IAM least privilege, KMS, lifecycle tiering, and monitoring/alerts. First I’ll inspect the current README.md, then create the full module-style files you listed.
+
+I confirmed the repo is minimal, so I’ll now create the full Terraform stack and a comprehensive README with deployment, validation, rollback, and cost guidance. I’m adding a tracked plan so each phase is visible.
+
+I’ve finished the design decisions and am now writing all Terraform files under datasync-log-archive/ plus a full operational README. The implementation will include secure defaults, optional EC2/on-prem source patterns, lifecycle tiering, alarms, and rollback steps.
+
+Core scaffolding is in place; next I’m adding IAM least-privilege and S3 policy controls that strictly enforce SSE-KMS and block non-TLS/public access. After that I’ll wire DataSync and alarms.
+
+I’ve completed the security foundation (KMS, S3, IAM) with strict encryption and no wildcard resource scopes. Next I’m wiring DataSync agent/location/task plus CloudWatch/SNS/CloudTrail to make it production-operational.
+
+The Terraform stack is now complete; I’m finalizing documentation with deployment, validation tests (5GB), rollback, DR notes, and a 1TB/month cost estimate so this is directly runnable by your platform team.
+
+I’m running a Terraform sanity check next (init + validate) to catch syntax/provider issues before handing this over.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform init -backend=false
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform validate
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform fmt -recursive
+Formatting adjusted one file, so I’m running a final terraform validate pass to ensure everything is still clean after formatting.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform validate
+I noticed terraform init created local provider artifacts, so I’m adding a .gitignore to keep state/provider binaries out of source control while preserving .terraform.lock.hcl.
+
+I’m doing one quick schema check to confirm whether the AWS provider currently supports explicit DataSync task report configuration, so I can call out any gap accurately.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform providers schema -json | Select-String "task_report|datasync_task_report|report_config"
+Implemented
+
+Built a full production Terraform solution under datasync-log-archive covering secure architecture, scaling controls, and operations.
+Added IaC for KMS, S3 encryption/lifecycle/public-block policy, least-privilege IAM, DataSync agent/locations/task schedule, CloudWatch alarms, SNS alerts, optional CloudTrail in main.tf, kms.tf, s3.tf, iam.tf, datasync.tf, cloudwatch.tf, variables.tf, outputs.tf.
+Added full deployment, validation (5GB test), rollback, checklist, DR, and cost estimate docs in README.md, plus repo pointer in README.md.
+Added Terraform hygiene ignore rules in .gitignore.
+Validation
+
+Ran terraform init -backend=false, terraform fmt -recursive, and terraform validate in datasync-log-archive with successful validation.
+Important Note
+
+AWS provider schema in this environment did not expose explicit DataSync task-report resources/blocks; CloudWatch logging + alarming are fully implemented, and task-report validation steps are documented in the runbook.
+Want me to generate a ready-to-apply terraform.tfvars for your EC2-source and on-prem-source variants next?
+
+
+-
