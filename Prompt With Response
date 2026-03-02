@@ -1,0 +1,388 @@
+📌 Project Objective
+
+Design and implement a secure, cost-optimized AWS DataSync architecture to transfer ~1000 GB/month of WAS server log files from source servers to Amazon S3 for archival, with lifecycle-based storage tiering.
+
+The system must:
+
+Support scheduled daily transfers
+
+Use least-privilege IAM
+
+Encrypt data in transit and at rest
+
+Include monitoring and alerting
+
+Be production-ready and scalable
+
+Follow AWS Well-Architected Framework (Security + Cost Optimization pillars)
+
+🔷 Architecture Requirements
+Source Environment
+
+WAS servers storing logs under:
+
+/logs/
+
+Logs rotated daily
+
+Approx 42GB/day generation
+
+Source may be:
+
+EC2-based WAS servers
+
+OR on-premises WAS servers
+
+Design solution to support both.
+
+🔷 AWS Services to Use
+
+AWS DataSync
+
+Amazon S3
+
+AWS IAM
+
+AWS KMS
+
+Amazon CloudWatch
+
+Amazon SNS (optional alerting)
+
+AWS Organizations (if multi-account)
+
+VPC endpoints (if private transfer)
+
+🔷 Security Requirements
+Identity & Access
+
+Create IAM role for DataSync with:
+
+s3:PutObject
+
+s3:AbortMultipartUpload
+
+s3:GetBucketLocation
+
+s3:ListBucket
+
+kms:Encrypt (if SSE-KMS used)
+
+Enforce:
+
+No wildcard resource permissions
+
+Explicit bucket-level ARN restrictions
+
+Encryption
+
+In Transit:
+
+TLS 1.2 minimum
+
+Private connectivity if possible (VPC endpoint)
+
+At Rest:
+
+S3 bucket must enforce:
+
+SSE-KMS encryption
+
+Bucket policy requiring encryption header
+
+Network Security
+
+If source is EC2:
+
+Deploy DataSync agent in same VPC
+
+Use private subnets
+
+Use S3 Gateway VPC Endpoint
+
+Block public S3 access
+
+If on-prem:
+
+Use IP allowlisting
+
+Restrict outbound traffic
+
+Use VPN or Direct Connect (if available)
+
+🔷 S3 Configuration
+
+Create bucket:
+
+prod-was-log-archive
+Enable:
+
+Versioning
+
+Default encryption (SSE-KMS)
+
+Block public access (all enabled)
+
+Access logging (optional)
+
+Lifecycle policies:
+
+Age	Transition
+30 days	S3 Glacier Instant Retrieval
+180 days	S3 Glacier Deep Archive
+365 days	Expire
+🔷 DataSync Configuration
+Agent
+
+Deploy DataSync agent (EC2 or VMware)
+
+Use minimal instance type (m5.large or as required)
+
+Harden OS:
+
+Disable SSH password auth
+
+Patch to latest AMI
+
+Restrict security group inbound
+
+Locations
+
+Create:
+
+Source location:
+
+NFS or SMB (or EC2 file system path)
+
+Destination location:
+
+S3 bucket path:
+
+s3://prod-was-log-archive/{hostname}/yyyy/mm/dd/
+Task Configuration
+
+Schedule: Daily at 1 AM
+
+Options:
+
+Verify mode: ONLY_FILES_TRANSFERRED
+
+Overwrite mode: NEVER
+
+Preserve deleted files: OFF
+
+Transfer mode: CHANGED files only
+
+Bandwidth limit: configurable (if required)
+
+Enable:
+
+CloudWatch logs
+
+Task reports
+
+🔷 Monitoring & Alerting
+
+Configure:
+
+CloudWatch metrics alarms for:
+
+Task failure
+
+Bytes transferred below threshold
+
+Agent offline
+
+SNS notification topic for:
+
+Failure alerts
+
+🔷 Cost Optimization Controls
+
+Use compression at source (gzip before transfer)
+
+Transfer only rotated logs
+
+Avoid CloudWatch ingestion (costly)
+
+Use lifecycle to move to Glacier tiers
+
+Avoid cross-region transfer unless required
+
+🔷 Observability & Governance
+
+Enable:
+
+CloudTrail logging
+
+S3 server access logging (optional)
+
+Tag all resources:
+
+Environment: PROD
+
+Owner: PlatformTeam
+
+CostCenter: IT-Infra
+
+🔷 VS Code Project Structure
+datasync-log-archive/
+│
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── iam.tf
+├── s3.tf
+├── datasync.tf
+├── cloudwatch.tf
+├── kms.tf
+└── README.md
+🔷 Compliance Controls
+
+Ensure solution supports:
+
+365-day retention
+
+Immutable retention (optional S3 Object Lock)
+
+KMS key rotation enabled
+
+No public internet exposure
+
+🔷 Validation Requirements
+
+Include:
+
+Test transfer of 5GB sample logs
+
+Verify:
+
+File integrity
+
+Encryption applied
+
+Lifecycle transition works
+
+Alerting triggers on failure
+
+🔷 Production Readiness Checklist
+
+ IAM least privilege validated
+
+ Bucket public access blocked
+
+ Encryption enforced via bucket policy
+
+ Lifecycle tested
+
+ Monitoring validated
+
+ Cost estimate approved
+
+ DR strategy documented
+
+ Runbook created
+
+🔷 Advanced (Optional)
+
+If enterprise scale:
+
+Cross-account centralized logging account
+
+S3 replication to DR region
+
+Athena integration for audit queries
+
+GuardDuty monitoring
+
+Macie classification (if sensitive data)
+
+🔷 Expected Output
+
+Generate:
+
+Complete Terraform (or CDK) code
+
+IAM policies with least privilege
+
+S3 bucket policy enforcing encryption
+
+DataSync task definition
+
+CloudWatch alarms
+
+SNS topic
+
+Cost estimate for 1TB/month
+
+Deployment instructions
+
+Rollback instructions
+
+🔷 Non-Functional Requirements
+
+Must scale to 5TB/month
+
+Must tolerate partial failures
+
+Must auto-retry failed transfers
+
+Must not expose logs publicly
+
+Must comply with AWS security best practices
+
+🎯 Architecture Summary
+
+Source (WAS Logs)
+→ DataSync Agent
+→ Encrypted Transfer
+→ S3 (SSE-KMS)
+→ Lifecycle to Glacier
+→ Monitoring via CloudWatch
+
+****************************************************************
+Response
+**************************
+Optimizing tool selection...
+
+I’m going to scaffold a production-ready Terraform solution in this repo with secure DataSync-to-S3 architecture, IAM least privilege, KMS, lifecycle tiering, and monitoring/alerts. First I’ll inspect the current README.md, then create the full module-style files you listed.
+
+I confirmed the repo is minimal, so I’ll now create the full Terraform stack and a comprehensive README with deployment, validation, rollback, and cost guidance. I’m adding a tracked plan so each phase is visible.
+
+I’ve finished the design decisions and am now writing all Terraform files under datasync-log-archive/ plus a full operational README. The implementation will include secure defaults, optional EC2/on-prem source patterns, lifecycle tiering, alarms, and rollback steps.
+
+Core scaffolding is in place; next I’m adding IAM least-privilege and S3 policy controls that strictly enforce SSE-KMS and block non-TLS/public access. After that I’ll wire DataSync and alarms.
+
+I’ve completed the security foundation (KMS, S3, IAM) with strict encryption and no wildcard resource scopes. Next I’m wiring DataSync agent/location/task plus CloudWatch/SNS/CloudTrail to make it production-operational.
+
+The Terraform stack is now complete; I’m finalizing documentation with deployment, validation tests (5GB), rollback, DR notes, and a 1TB/month cost estimate so this is directly runnable by your platform team.
+
+I’m running a Terraform sanity check next (init + validate) to catch syntax/provider issues before handing this over.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform init -backend=false
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform validate
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform fmt -recursive
+Formatting adjusted one file, so I’m running a final terraform validate pass to ensure everything is still clean after formatting.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform validate
+I noticed terraform init created local provider artifacts, so I’m adding a .gitignore to keep state/provider binaries out of source control while preserving .terraform.lock.hcl.
+
+I’m doing one quick schema check to confirm whether the AWS provider currently supports explicit DataSync task report configuration, so I can call out any gap accurately.
+
+Set-Location "c:\DJ E16 Laptop Local\Training\AWS\AWS-DataSync-ToS3\datasync-log-archive"; terraform providers schema -json | Select-String "task_report|datasync_task_report|report_config"
+Implemented
+
+Built a full production Terraform solution under datasync-log-archive covering secure architecture, scaling controls, and operations.
+Added IaC for KMS, S3 encryption/lifecycle/public-block policy, least-privilege IAM, DataSync agent/locations/task schedule, CloudWatch alarms, SNS alerts, optional CloudTrail in main.tf, kms.tf, s3.tf, iam.tf, datasync.tf, cloudwatch.tf, variables.tf, outputs.tf.
+Added full deployment, validation (5GB test), rollback, checklist, DR, and cost estimate docs in README.md, plus repo pointer in README.md.
+Added Terraform hygiene ignore rules in .gitignore.
+Validation
+
+Ran terraform init -backend=false, terraform fmt -recursive, and terraform validate in datasync-log-archive with successful validation.
+Important Note
+
+AWS provider schema in this environment did not expose explicit DataSync task-report resources/blocks; CloudWatch logging + alarming are fully implemented, and task-report validation steps are documented in the runbook.
+Want me to generate a ready-to-apply terraform.tfvars for your EC2-source and on-prem-source variants next?
+
+
+-
