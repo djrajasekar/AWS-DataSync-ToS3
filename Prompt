@@ -1,0 +1,341 @@
+📌 Project Objective
+
+Design and implement a secure, cost-optimized AWS DataSync architecture to transfer ~1000 GB/month of WAS server log files from source servers to Amazon S3 for archival, with lifecycle-based storage tiering.
+
+The system must:
+
+Support scheduled daily transfers
+
+Use least-privilege IAM
+
+Encrypt data in transit and at rest
+
+Include monitoring and alerting
+
+Be production-ready and scalable
+
+Follow AWS Well-Architected Framework (Security + Cost Optimization pillars)
+
+🔷 Architecture Requirements
+Source Environment
+
+WAS servers storing logs under:
+
+/logs/
+
+Logs rotated daily
+
+Approx 42GB/day generation
+
+Source may be:
+
+EC2-based WAS servers
+
+OR on-premises WAS servers
+
+Design solution to support both.
+
+🔷 AWS Services to Use
+
+AWS DataSync
+
+Amazon S3
+
+AWS IAM
+
+AWS KMS
+
+Amazon CloudWatch
+
+Amazon SNS (optional alerting)
+
+AWS Organizations (if multi-account)
+
+VPC endpoints (if private transfer)
+
+🔷 Security Requirements
+Identity & Access
+
+Create IAM role for DataSync with:
+
+s3:PutObject
+
+s3:AbortMultipartUpload
+
+s3:GetBucketLocation
+
+s3:ListBucket
+
+kms:Encrypt (if SSE-KMS used)
+
+Enforce:
+
+No wildcard resource permissions
+
+Explicit bucket-level ARN restrictions
+
+Encryption
+
+In Transit:
+
+TLS 1.2 minimum
+
+Private connectivity if possible (VPC endpoint)
+
+At Rest:
+
+S3 bucket must enforce:
+
+SSE-KMS encryption
+
+Bucket policy requiring encryption header
+
+Network Security
+
+If source is EC2:
+
+Deploy DataSync agent in same VPC
+
+Use private subnets
+
+Use S3 Gateway VPC Endpoint
+
+Block public S3 access
+
+If on-prem:
+
+Use IP allowlisting
+
+Restrict outbound traffic
+
+Use VPN or Direct Connect (if available)
+
+🔷 S3 Configuration
+
+Create bucket:
+
+prod-was-log-archive
+Enable:
+
+Versioning
+
+Default encryption (SSE-KMS)
+
+Block public access (all enabled)
+
+Access logging (optional)
+
+Lifecycle policies:
+
+Age	Transition
+30 days	S3 Glacier Instant Retrieval
+180 days	S3 Glacier Deep Archive
+365 days	Expire
+🔷 DataSync Configuration
+Agent
+
+Deploy DataSync agent (EC2 or VMware)
+
+Use minimal instance type (m5.large or as required)
+
+Harden OS:
+
+Disable SSH password auth
+
+Patch to latest AMI
+
+Restrict security group inbound
+
+Locations
+
+Create:
+
+Source location:
+
+NFS or SMB (or EC2 file system path)
+
+Destination location:
+
+S3 bucket path:
+
+s3://prod-was-log-archive/{hostname}/yyyy/mm/dd/
+Task Configuration
+
+Schedule: Daily at 1 AM
+
+Options:
+
+Verify mode: ONLY_FILES_TRANSFERRED
+
+Overwrite mode: NEVER
+
+Preserve deleted files: OFF
+
+Transfer mode: CHANGED files only
+
+Bandwidth limit: configurable (if required)
+
+Enable:
+
+CloudWatch logs
+
+Task reports
+
+🔷 Monitoring & Alerting
+
+Configure:
+
+CloudWatch metrics alarms for:
+
+Task failure
+
+Bytes transferred below threshold
+
+Agent offline
+
+SNS notification topic for:
+
+Failure alerts
+
+🔷 Cost Optimization Controls
+
+Use compression at source (gzip before transfer)
+
+Transfer only rotated logs
+
+Avoid CloudWatch ingestion (costly)
+
+Use lifecycle to move to Glacier tiers
+
+Avoid cross-region transfer unless required
+
+🔷 Observability & Governance
+
+Enable:
+
+CloudTrail logging
+
+S3 server access logging (optional)
+
+Tag all resources:
+
+Environment: PROD
+
+Owner: PlatformTeam
+
+CostCenter: IT-Infra
+
+🔷 VS Code Project Structure
+datasync-log-archive/
+│
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── iam.tf
+├── s3.tf
+├── datasync.tf
+├── cloudwatch.tf
+├── kms.tf
+└── README.md
+🔷 Compliance Controls
+
+Ensure solution supports:
+
+365-day retention
+
+Immutable retention (optional S3 Object Lock)
+
+KMS key rotation enabled
+
+No public internet exposure
+
+🔷 Validation Requirements
+
+Include:
+
+Test transfer of 5GB sample logs
+
+Verify:
+
+File integrity
+
+Encryption applied
+
+Lifecycle transition works
+
+Alerting triggers on failure
+
+🔷 Production Readiness Checklist
+
+ IAM least privilege validated
+
+ Bucket public access blocked
+
+ Encryption enforced via bucket policy
+
+ Lifecycle tested
+
+ Monitoring validated
+
+ Cost estimate approved
+
+ DR strategy documented
+
+ Runbook created
+
+🔷 Advanced (Optional)
+
+If enterprise scale:
+
+Cross-account centralized logging account
+
+S3 replication to DR region
+
+Athena integration for audit queries
+
+GuardDuty monitoring
+
+Macie classification (if sensitive data)
+
+🔷 Expected Output
+
+Generate:
+
+Complete Terraform (or CDK) code
+
+IAM policies with least privilege
+
+S3 bucket policy enforcing encryption
+
+DataSync task definition
+
+CloudWatch alarms
+
+SNS topic
+
+Cost estimate for 1TB/month
+
+Deployment instructions
+
+Rollback instructions
+
+🔷 Non-Functional Requirements
+
+Must scale to 5TB/month
+
+Must tolerate partial failures
+
+Must auto-retry failed transfers
+
+Must not expose logs publicly
+
+Must comply with AWS security best practices
+
+🎯 Architecture Summary
+
+Source (WAS Logs)
+→ DataSync Agent
+→ Encrypted Transfer
+→ S3 (SSE-KMS)
+→ Lifecycle to Glacier
+→ Monitoring via CloudWatch
