@@ -7,6 +7,9 @@ from diagrams.aws.storage import S3, S3Glacier
 from diagrams.onprem.client import User
 from diagrams.onprem.compute import Server
 from diagrams.onprem.network import Internet
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 graph_attr = {
     "rankdir": "LR",
@@ -26,8 +29,8 @@ node_attr = {
 }
 
 with Diagram(
-    "AWS DataSync Log Archival Architecture (DEV)",
-    filename="diagrams/architecture",
+    "AWS DataSync Log Archival Architecture",
+    filename=str(BASE_DIR / "diagrams" / "aws" / "architecture"),
     outformat="png",
     show=False,
     direction="LR",

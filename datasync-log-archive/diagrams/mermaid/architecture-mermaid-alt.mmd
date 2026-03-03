@@ -1,0 +1,31 @@
+flowchart LR
+  subgraph SRC[Source Environment]
+    WAS[WAS Servers\n/logs/*.gz]
+    ROTATE[Daily Rotation\n~42 GB/day]
+    WAS --> ROTATE
+  end
+
+  subgraph CONN[Secure Transfer]
+    AGENT[DataSync Agent\nEC2 Private or On-Prem]
+    TLS[TLS 1.2]
+  end
+
+  subgraph AWS[AWS]
+    TASK[DataSync Task\nDaily 01:00 UTC]
+    S3[(S3\ndev-was-log-archive)]
+    KMS[KMS\nSSE-KMS]
+    LIFE[Lifecycle\n30d IR\n180d Deep Archive\n365d Expire]
+    CW[CloudWatch]
+    SNS[SNS Alerts]
+    CT[CloudTrail]
+    IAM[IAM Role\nLeast Privilege]
+  end
+
+  ROTATE --> AGENT
+  AGENT --> TLS --> TASK
+  IAM --> TASK
+  TASK --> S3
+  KMS --> S3
+  S3 --> LIFE
+  TASK --> CW --> SNS
+  CT --> S3

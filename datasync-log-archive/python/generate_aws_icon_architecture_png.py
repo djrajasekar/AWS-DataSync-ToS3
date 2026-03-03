@@ -2,9 +2,9 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
  
 
-ROOT = Path(__file__).resolve().parent
-OUT = ROOT / "diagrams" / "architecture.png"
-ICON_DIR = ROOT / "diagrams" / "aws-icons"
+BASE_DIR = Path(__file__).resolve().parents[1]
+OUT = BASE_DIR / "diagrams" / "aws" / "architecture.png"
+ICON_DIR = BASE_DIR / "diagrams" / "aws" / "icons"
 
 WIDTH, HEIGHT = 3600, 1800
 CANVAS_BG = (255, 255, 255)
@@ -71,7 +71,7 @@ label_font = load_font(22)
 small_font = load_font(20)
 
 # Title
-main_title = "AWS DataSync Log Archive Architecture (DEV)"
+main_title = "AWS DataSync Log Archive Architecture"
 draw.text((60, 26), main_title, fill=TEXT_COLOR, font=title_font)
 
 draw.text((60, 95), "Encrypted transfer, least-privilege IAM, lifecycle tiering, monitoring and alerting", fill=(70, 84, 115), font=small_font)

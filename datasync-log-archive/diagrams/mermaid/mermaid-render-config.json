@@ -1,0 +1,16 @@
+{
+  "theme": "neutral",
+  "themeVariables": {
+    "background": "#ffffff",
+    "primaryTextColor": "#111111",
+    "secondaryTextColor": "#111111",
+    "tertiaryTextColor": "#111111",
+    "lineColor": "#333333",
+    "fontFamily": "Arial",
+    "fontSize": "20px"
+  },
+  "flowchart": {
+    "htmlLabels": false,
+    "curve": "linear"
+  }
+}
