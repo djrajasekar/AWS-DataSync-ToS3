@@ -30,37 +30,6 @@ Source (WAS logs under `/logs/`) → DataSync Agent → TLS 1.2 transfer → S3 
 - CloudTrail audit trail (optional, enabled by default).
 - Optional EC2 deployment pattern for DataSync agent + optional S3 Gateway VPC endpoint for private transfer.
 
-## File Layout
-
-```text
-AWS-DataSync-ToS3/
-├── README.md
-└── datasync-log-archive/
-	├── terraform/
-	│   ├── main.tf
-	│   ├── variables.tf
-	│   ├── outputs.tf
-	│   ├── iam.tf
-	│   ├── s3.tf
-	│   ├── datasync.tf
-	│   ├── cloudwatch.tf
-	│   ├── kms.tf
-	│   └── .terraform.lock.hcl
-	├── python/
-	│   ├── generate_aws_icon_architecture_png.py
-	│   └── generate_aws_architecture_diagram.py
-	└── diagrams/
-		├── aws/
-		│   ├── architecture.png
-		│   ├── architecture
-		│   └── icons/
-		└── mermaid/
-			├── architecture.mmd
-			├── architecture-mermaid-alt.mmd
-			├── architecture-mermaid-alt.png
-			└── mermaid-render-config.json
-```
-
 ## Prerequisites
 
 - Terraform `>= 1.5`
@@ -202,3 +171,34 @@ If Object Lock is enabled or retention/legal holds exist, S3 bucket deletion may
 - [ ] Cost estimate approved
 - [ ] DR strategy documented
 - [ ] Runbook reviewed by operations
+
+## File Layout
+
+```text
+AWS-DataSync-ToS3/
+├── README.md
+└── datasync-log-archive/
+	├── terraform/
+	│   ├── main.tf
+	│   ├── variables.tf
+	│   ├── outputs.tf
+	│   ├── iam.tf
+	│   ├── s3.tf
+	│   ├── datasync.tf
+	│   ├── cloudwatch.tf
+	│   ├── kms.tf
+	│   └── .terraform.lock.hcl
+	├── python/
+	│   ├── generate_aws_icon_architecture_png.py
+	│   └── generate_aws_architecture_diagram.py
+	└── diagrams/
+		├── aws/
+		│   ├── architecture.png
+		│   ├── architecture
+		│   └── icons/
+		└── mermaid/
+			├── architecture.mmd
+			├── architecture-mermaid-alt.mmd
+			├── architecture-mermaid-alt.png
+			└── mermaid-render-config.json
+```
