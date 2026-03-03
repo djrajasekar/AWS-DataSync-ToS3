@@ -202,3 +202,7 @@ AWS-DataSync-ToS3/
 			├── architecture-mermaid-alt.png
 			└── mermaid-render-config.json
 ```
+
+## References
+
+- [AWS Config Auto-Remediation for Configuring S3 Lifecycle Rule](https://dev.to/aws-builders/aws-config-auto-remediation-for-configuring-s3-lifecycle-rule-357n)
