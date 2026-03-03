@@ -1,0 +1,49 @@
+digraph "AWS DataSync Log Archival Architecture (DEV)" {
+	graph [bgcolor=white dpi=300 fontcolor="#2D3436" fontname=Arial fontsize=20 label="AWS DataSync Log Archival Architecture (DEV)" nodesep=0.9 pad=0.4 rankdir=LR ranksep=1.1 splines=spline]
+	node [fixedsize=true fontcolor="#2D3436" fontname=Arial fontsize=14 height=1.4 imagescale=true labelloc=b shape=box style=rounded width=1.4]
+	edge [color="#7B8894"]
+	c92af62864f742849b2b61eb201b7879 -> bb2fd03d63204550856476c523177862 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	subgraph "cluster_Source Environment" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Source Environment" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		bb2fd03d63204550856476c523177862 [label="WAS Servers
+/logs/*.gz" height=2.3 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/onprem/compute\server.png" shape=none]
+		c92af62864f742849b2b61eb201b7879 [label="App / Ops Team" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/onprem/client\user.png" shape=none]
+	}
+	subgraph "cluster_Secure Connectivity" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Secure Connectivity" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"5f211fb025a44cc58bd05a85e3bbed17" [label="DataSync Agent
+EC2 Private / On-Prem" height=2.3 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/migration\datasync-agent.png" shape=none]
+		"0867f41e1cb34cba8640868b0527e986" [label="TLS 1.2 Encrypted Transfer" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/onprem/network\internet.png" shape=none]
+	}
+	subgraph "cluster_AWS Account" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="AWS Account" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		f51d390e215a4e999679f12235021aab [label="DataSync Task
+Daily 01:00 UTC
+Changed Files" height=2.7 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/migration\datasync.png" shape=none]
+		dc1cf140dc0745d4bf3923c809c9f275 [label="S3
+dev-was-log-archive" height=2.3 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/storage\simple-storage-service-s3.png" shape=none]
+		d12281a45bfd4aac8da8c746e9dc9a9e [label="Lifecycle
+30d IR / 180d DA" height=2.3 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/storage\s3-glacier.png" shape=none]
+		e12d5313a26d46ab8b55d5865a01fd94 [label="KMS CMK
+SSE-KMS" height=2.3 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/security\key-management-service.png" shape=none]
+		"88c1446e6b6d4d2fbde5c9d53218846c" [label="Least Privilege IAM Role" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/security\identity-and-access-management-iam.png" shape=none]
+		be5f17d530564131aba61881271df8dc [label="CloudWatch Logs" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+		f81b4f0754fe4cc985076ccfccd34c74 [label="CloudWatch Metrics" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/management\cloudwatch.png" shape=none]
+		f71ade54a2d647738823a43c2cce0bfe [label="Failure / Low Bytes / Agent Offline" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/management\cloudwatch-alarm.png" shape=none]
+		"9ef5a53de64745ee9f48148318722bd1" [label="SNS Alerts" height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/integration\simple-notification-service-sns.png" shape=none]
+		"1e7eda5b04fe4921a331dd292426add4" [label=CloudTrail height=1.9 image="C:\Users\djraj\AppData\Roaming\Python\Python313\site-packages\resources/aws/management\cloudtrail.png" shape=none]
+	}
+	bb2fd03d63204550856476c523177862 -> "5f211fb025a44cc58bd05a85e3bbed17" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"5f211fb025a44cc58bd05a85e3bbed17" -> "0867f41e1cb34cba8640868b0527e986" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"0867f41e1cb34cba8640868b0527e986" -> f51d390e215a4e999679f12235021aab [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"88c1446e6b6d4d2fbde5c9d53218846c" -> f51d390e215a4e999679f12235021aab [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f51d390e215a4e999679f12235021aab -> dc1cf140dc0745d4bf3923c809c9f275 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	e12d5313a26d46ab8b55d5865a01fd94 -> dc1cf140dc0745d4bf3923c809c9f275 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	dc1cf140dc0745d4bf3923c809c9f275 -> d12281a45bfd4aac8da8c746e9dc9a9e [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f51d390e215a4e999679f12235021aab -> be5f17d530564131aba61881271df8dc [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f51d390e215a4e999679f12235021aab -> f81b4f0754fe4cc985076ccfccd34c74 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f81b4f0754fe4cc985076ccfccd34c74 -> f71ade54a2d647738823a43c2cce0bfe [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f71ade54a2d647738823a43c2cce0bfe -> "9ef5a53de64745ee9f48148318722bd1" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"5f211fb025a44cc58bd05a85e3bbed17" -> f81b4f0754fe4cc985076ccfccd34c74 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"1e7eda5b04fe4921a331dd292426add4" -> dc1cf140dc0745d4bf3923c809c9f275 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+}

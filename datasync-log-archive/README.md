@@ -8,48 +8,6 @@ Source (WAS logs under `/logs/`) → DataSync Agent → TLS 1.2 transfer → S3 
 
 ![DataSync Architecture Diagram](diagrams/architecture.png)
 
-```mermaid
-flowchart LR
-  subgraph SRC[Source Environment]
-    WAS[WAS Servers\n/logs/*.gz]
-    ROTATE[Daily Log Rotation\n~42GB/day]
-    WAS --> ROTATE
-  end
-
-  subgraph NET[Secure Connectivity]
-    AGENT[AWS DataSync Agent\n(EC2 Private Subnet or On-Prem VMware)]
-    TLS[TLS 1.2 in Transit]
-    VPCE[S3 Gateway VPC Endpoint\n(EC2 pattern)]
-    VPN[VPN / Direct Connect\n(On-Prem pattern)]
-  end
-
-  subgraph AWS[AWS Logging Account / Workload Account]
-    TASK[DataSync Task\nDaily 01:00 UTC\nChanged Files Only]
-    S3[(Amazon S3\ndev-was-log-archive)]
-    KMS[AWS KMS CMK\nSSE-KMS + Rotation]
-    LC[S3 Lifecycle\n30d: Glacier IR\n180d: Deep Archive\n365d: Expire]
-    CW[CloudWatch Logs & Alarms\nTask Failure / Low Bytes / Agent Offline]
-    SNS[SNS Alerts\nEmail Notifications]
-    CT[CloudTrail Audit Logs]
-    IAM[IAM Least Privilege\nDataSync S3 Access Role]
-  end
-
-  ROTATE --> AGENT
-  AGENT --> TLS --> TASK
-  VPCE -. private route .- TASK
-  VPN -. private/hybrid route .- AGENT
-
-  TASK --> S3
-  IAM --> TASK
-  KMS --> S3
-  S3 --> LC
-
-  TASK --> CW
-  AGENT --> CW
-  CW --> SNS
-  CT --> S3
-```
-
 ## What This Deploys
 
 - KMS CMK with key rotation enabled.
@@ -74,14 +32,18 @@ flowchart LR
 
 ## File Layout
 
-- `main.tf`
-- `variables.tf`
-- `outputs.tf`
-- `iam.tf`
-- `s3.tf`
-- `datasync.tf`
-- `cloudwatch.tf`
-- `kms.tf`
+- `terraform/main.tf`
+- `terraform/variables.tf`
+- `terraform/outputs.tf`
+- `terraform/iam.tf`
+- `terraform/s3.tf`
+- `terraform/datasync.tf`
+- `terraform/cloudwatch.tf`
+- `terraform/kms.tf`
+- `terraform/.terraform.lock.hcl`
+- `diagrams/architecture.png`
+- `python/generate_aws_icon_architecture_png.py`
+- `python/generate_aws_architecture_diagram.py`
 
 ## Prerequisites
 
@@ -129,6 +91,7 @@ smb_password = "REPLACE_ME"
 ## Deploy
 
 ```bash
+cd terraform
 terraform init
 terraform fmt -recursive
 terraform validate
@@ -195,6 +158,7 @@ Estimated monthly range:
 4. Destroy infrastructure:
 
 ```bash
+cd terraform
 terraform destroy
 ```
 
